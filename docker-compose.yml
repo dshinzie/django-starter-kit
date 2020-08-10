@@ -1,0 +1,40 @@
+version: '3'
+services:
+  web:
+    build: .
+    ports:
+    - "8080:8080"
+    command: ["./wait-for-db.sh", "python", "manage.py", "runserver", "0.0.0.0:8080"]
+    tty: true
+    env_file:
+      - .env
+    volumes:
+    - cloudsql:/cloudsql/
+    - .:/app
+    depends_on:
+    - db
+    - redis
+  db:
+    image: postgres:12.3
+    environment:
+    - POSTGRES_PASSWORD=pgpasswordXYZ
+    volumes:
+    - cloudsql:/var/run/postgresql/
+    - ./dev-db/:/docker-entrypoint-initdb.d/
+  redis:
+    image: "redis:alpine"
+  celery:
+    build: .
+    command: ["celery", "-A", "starterkit", "worker", "-Q", "celery", "-l", "info"]
+    env_file:
+      - .env
+    volumes:
+      - cloudsql:/cloudsql/
+      - .:/app
+    depends_on:
+      - db
+      - redis
+  
+volumes:
+  # mimic how Cloud Run will mount in the db socket
+  cloudsql: {}

@@ -1,0 +1,16 @@
+.DS_Store
+.artifacts
+.env
+.idea
+*.pyc
+*.retry
+/static/*
+starterkit/static/*
+env
+media
+celerybeat.pid
+celerybeat-schedule
+celerybeat-schedule.db
+testdb
+__pycache__
+db.sqlite3
