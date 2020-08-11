@@ -1,3 +1,27 @@
-from django.shortcuts import render
+from rest_auth.registration.views import RegisterView
+from rest_auth.views import (LoginView, LogoutView, PasswordResetView,
+                            PasswordChangeView, PasswordResetConfirmView)
 
-# Create your views here.
+
+class CustomRegisterView(RegisterView):
+    pass
+
+
+class CustomLoginView(LoginView):
+    pass
+
+
+class CustomLogoutView(LogoutView):
+    pass
+
+
+class CustomPasswordResetView(PasswordResetView):
+    pass
+
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    pass
+
+
+class CustomPasswordChangeView(PasswordChangeView):
+    pass
