@@ -7,7 +7,6 @@ from celery.signals import after_setup_logger, after_setup_task_logger
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'starterkit.settings')
 
 # Celery configs
-patch(celery=True)
 app = celery.Celery('starterkit')
 app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()

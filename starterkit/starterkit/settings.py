@@ -31,12 +31,33 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # Django
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+    'django_extensions',
+    # Rest Framework
+    'rest_framework',
+    'rest_framework.authtoken',
+    'rest_framework_api_key',
+    # Auth
+    'rest_auth',
+    'rest_auth.registration',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    # OAuth 2.0
+    'oauth2_provider',
+    # Others
+    'corsheaders',
+    # App specifiic
+    'starterkit',
+    'account.apps.AccountConfig',
+    'friendship'
 ]
 
 MIDDLEWARE = [
