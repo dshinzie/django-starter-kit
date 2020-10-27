@@ -8,9 +8,10 @@ jobs:
       - image: google/cloud-sdk
     steps:
       - checkout
-
-      - setup_remote_docker:
-          docker_layer_caching: true
+      
+      # paid version
+      # - setup_remote_docker:
+      #     docker_layer_caching: true
 
       - run:
           name: Environment setup
