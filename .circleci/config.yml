@@ -1,0 +1,45 @@
+# django-starter-kit Circle-CI config
+version: 2.1
+orbs:
+  slack: circleci/slack@1.0.0
+jobs:
+  build:
+    docker:
+      - image: google/cloud-sdk
+    steps:
+      - checkout
+
+      - setup_remote_docker:
+          docker_layer_caching: true
+
+      - run:
+          name: Environment setup
+          command: |
+            DOCKER_TAG=`date '+%Y%m%d'`-${CIRCLE_BUILD_NUM}
+            REGISTRY_PUSH=0
+            if [ "${CIRCLE_BRANCH}" != "master" ]
+            then
+                DOCKER_TAG=RC-${DOCKER_TAG}
+            fi
+            IMAGE_URL=gcr.io/${GOOGLE_PROJECT_ID}/${DOCKER_IMAGE_NAME}:${DOCKER_TAG}
+
+            # variables available from other jobs
+            echo "export IMAGE_URL=${IMAGE_URL}" >> $BASH_ENV
+            echo "export DOCKER_TAG=${DOCKER_TAG}" >> $BASH_ENV
+
+      - run:
+          name: Docker build
+          command: docker build -t ${IMAGE_URL} .
+
+      - deploy:
+          name: Push to registry
+          command: |
+            echo ${IMAGE_URL}
+            echo $GCLOUD_SERVICE_KEY | gcloud auth activate-service-account --key-file=-
+            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+            gcloud auth configure-docker
+            docker push ${IMAGE_URL}
+
+      - slack/notify:
+          message: ${DOCKER_TAG}
+          webhook: ${SLACK_WEBHOOK}
