@@ -1,6 +1,8 @@
 from rest_auth.registration.views import RegisterView
-from rest_auth.views import (LoginView, LogoutView, PasswordResetView,
-                            PasswordChangeView, PasswordResetConfirmView)
+from rest_auth.views import (
+    LoginView, LogoutView, PasswordResetView,
+    PasswordChangeView, PasswordResetConfirmView
+)
 
 
 class CustomRegisterView(RegisterView):
