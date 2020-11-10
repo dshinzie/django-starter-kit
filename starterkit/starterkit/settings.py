@@ -150,7 +150,7 @@ LOGGING = {
             'handlers': [LOGGING_HANDLER],
             'propagate': True,
         },
-        'rivt': {
+        'starterkit': {
             'handlers': [LOGGING_HANDLER],
             'level': 'INFO',
             'propagate': False,

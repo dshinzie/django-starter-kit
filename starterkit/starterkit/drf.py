@@ -2,7 +2,7 @@ import logging
 from django.core.mail import EmailMultiAlternatives, get_connection
 from rest_framework.authentication import TokenAuthentication
 from rest_framework_api_key.permissions import BaseHasAPIKey
-from .models import RivtAPIKey
+from .models import StarterAPIKey
 
 log = logging.getLogger(__name__)
 
@@ -13,13 +13,13 @@ class BearerAuthentication(TokenAuthentication):
             
 
 class HasAPIKey(BaseHasAPIKey):
-    model = RivtAPIKey
+    model = StarterAPIKey
 
     def get_key(self, request):
         return request.META.get('HTTP_API_KEY')
 
 
-class RivtEmailMultiAlternatives(EmailMultiAlternatives):
+class StarterEmailMultiAlternatives(EmailMultiAlternatives):
     """
     Custom EmailMultiAlternatives to send context to email backend via get_connection()
     """
