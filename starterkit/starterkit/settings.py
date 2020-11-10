@@ -11,8 +11,14 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 import os
+import urllib
+import logging
 from pathlib import Path
 from corsheaders.defaults import default_headers
+from google.oauth2 import service_account
+
+log = logging.getLogger(__name__)
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
@@ -27,7 +33,8 @@ SECRET_KEY = 't$g5e5ok9@%&ens2=hze$4&t$w_@yl#9%%umu*164)n7(w%ipt'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+CORS_ORIGIN_ALLOW_ALL = True
 
 
 # Application definition
@@ -47,8 +54,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework_api_key',
     # Auth
-    'rest_auth',
-    'rest_auth.registration',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -58,18 +65,21 @@ INSTALLED_APPS = [
     'corsheaders',
     # App specifiic
     'starterkit',
-    'friendship',
     'user',
+    'communication',
+    'friendship',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'starterkit.middleware.ApiKeyMiddleware',
 ]
 
 ROOT_URLCONF = 'starterkit.urls'
@@ -106,6 +116,52 @@ DATABASES = {
     }
 }
 
+LOGGING_HANDLER = os.getenv('LOGGING_HANDLER', 'console')
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s [%(filename)s:%(lineno)s %(process)d %(processName)s] %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
+        'stackdriver': {
+            'level': 'INFO',
+            'class': 'google.cloud.logging.handlers.ContainerEngineHandler',
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': [LOGGING_HANDLER],
+            'propagate': True,
+        },
+        'rivt': {
+            'handlers': [LOGGING_HANDLER],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': [LOGGING_HANDLER],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -145,7 +201,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = os.getenv('STATIC_URL', '/static/')
+STATIC_ROOT = os.getenv('STATIC_ROOT', 'static/')
+
+# https://docs.djangoproject.com/en/2.1/howto/static-files/#serving-files-uploaded-by-a-user-during-development
+MEDIA_ROOT = './media/'
+MEDIA_URL = '/media/'
 
 # Celery and Redis
 CELERY_BROKER_URL = 'redis://redis:6379'
@@ -153,6 +214,9 @@ CELERY_RESULT_BACKEND = 'redis://redis:6379'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+CELERY_IMPORTS = ()
+CELERY_TASK_ROUTES = {}
+CELERY_BEAT_SCHEDULE = {}
 
 # CORS Headers
 CORS_ALLOW_HEADERS = default_headers + (
@@ -165,6 +229,36 @@ ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = False
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+    'oauth2_provider.backends.OAuth2Backend',
+)
 
 # API Keys
 API_KEY_CUSTOM_HEADER = 'Api-Key'
+
+# Frontend
+WEB_UI_BASE_PATH = os.getenv('WEB_UI_BASE_PATH', 'http://localhost:3000')
+WEB_UI_HOST = urllib.parse.urlparse(WEB_UI_BASE_PATH).netloc
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+OLD_PASSWORD_FIELD_ENABLED = True
+LOGOUT_ON_PASSWORD_CHANGE = True
+
+# Email
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND')
+DEFAULT_FROM_EMAIL = 'noreply@starterkit.com'
+DEFAULT_FROM_NAME = 'StarterKit'
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# GCP Storage
+GS_BUCKET_NAME = os.getenv('GS_BUCKET_NAME')
+if GS_BUCKET_NAME:
+    DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+    GS_DEFAULT_ACL = 'publicRead'
+    GS_PROJECT_ID = os.getenv('GS_PROJECT_ID')
+    GS_CREDENTIALS_PATH = os.getenv('GS_CREDENTIALS_PATH')
+    try:
+        GS_CREDENTIALS = service_account.Credentials.from_service_account_file(GS_CREDENTIALS_PATH)
+    except (FileNotFoundError, AttributeError):
+        log.error("GCP credentials file configured incorrectly.")
