@@ -3,4 +3,5 @@ from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
-    pass
+    unique_id = models.IntegerField(blank=True, null=True)
+    random_field = models.CharField(max_length=40, blank=True, null=True)

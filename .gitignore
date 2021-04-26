@@ -1,6 +1,5 @@
 .DS_Store
 .artifacts
-.env
 .idea
 *.pyc
 *.retry

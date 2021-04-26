@@ -13,7 +13,7 @@ services:
     - .:/app
     depends_on:
     - db
-    - redis
+    # - redis
   db:
     image: postgres:12.3
     environment:
@@ -21,19 +21,19 @@ services:
     volumes:
     - cloudsql:/var/run/postgresql/
     - ./dev-db/:/docker-entrypoint-initdb.d/
-  redis:
-    image: "redis:alpine"
-  celery:
-    build: .
-    command: ["celery", "-A", "starterkit", "worker", "-Q", "celery", "-l", "info"]
-    env_file:
-      - .env
-    volumes:
-      - cloudsql:/cloudsql/
-      - .:/app
-    depends_on:
-      - db
-      - redis
+  # redis:
+  #   image: "redis:alpine"
+  # celery:
+  #   build: .
+  #   command: ["celery", "-A", "starterkit", "worker", "-Q", "celery", "-l", "info"]
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - cloudsql:/cloudsql/
+  #     - .:/app
+  #   depends_on:
+  #     - db
+  #     - redis
   
 volumes:
   # mimic how Cloud Run will mount in the db socket

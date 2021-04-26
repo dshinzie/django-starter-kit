@@ -1,7 +1,7 @@
 import logging
-from django.conf import settings
 from celery import shared_task
-User = settings.AUTH_USER_MODEL
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 log = logging.getLogger(__name__)
 

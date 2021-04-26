@@ -67,7 +67,6 @@ INSTALLED_APPS = [
     'starterkit',
     'user',
     'communication',
-    'friendship',
 ]
 
 MIDDLEWARE = [
@@ -87,7 +86,7 @@ ROOT_URLCONF = 'starterkit.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -182,6 +181,12 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTH_USER_MODEL = 'user.User'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'starterkit.drf.BearerAuthentication',
+    ]
+}
 
 
 # Internationalization
